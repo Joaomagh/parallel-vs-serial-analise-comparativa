@@ -14,11 +14,11 @@
     </properties>
 
     <dependencies>
-        <!-- Dependência para leitura e manipulação de CSV (opcional futuramente) -->
-        <!-- <dependency>
-            <groupId>com.opencsv</groupId>
-            <artifactId>opencsv</artifactId>
-            <version>5.7.1</version>
-        </dependency> -->
+        <dependency>
+            <groupId>org.jocl</groupId>
+            <artifactId>jocl</artifactId>
+            <version>2.0.4</version>
+        </dependency>
+
     </dependencies>
 </project>
