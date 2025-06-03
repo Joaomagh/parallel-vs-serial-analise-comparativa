@@ -1,11 +1,11 @@
 package com.projeto.gui;
 
-class ResultadoExecucao { // Removido 'public' para permitir múltiplas classes de topo no mesmo bloco de exemplo
+class ResultadoExecucao {
     String tipoExecucao;
     int idConfigCpuGpu;
     long tempoMs;
     int ocorrencias;
-    String dataset;
+    String dataset; // Armazena o caminho completo/original do CSV
     String palavraBuscada;
     int numExecucao;
 
@@ -19,14 +19,26 @@ class ResultadoExecucao { // Removido 'public' para permitir múltiplas classes 
         this.numExecucao = numExecucao;
     }
 
-    // Getters
     public String getTipoExecucao() { return tipoExecucao; }
     public int getIdConfigCpuGpu() { return idConfigCpuGpu; }
     public long getTempoMs() { return tempoMs; }
     public int getOcorrencias() { return ocorrencias; }
-    public String getDataset() { return dataset; }
+    public String getDataset() { return dataset; } // Retorna o caminho completo
     public String getPalavraBuscada() { return palavraBuscada; }
     public int getNumExecucao() { return numExecucao; }
+
+    // Helper para obter apenas o nome do arquivo do dataset
+    public String getDatasetFileName() {
+        if (dataset == null || dataset.isEmpty()) {
+            return "";
+        }
+        String normalizedPath = dataset.replace("\\", "/");
+        if (normalizedPath.endsWith("/")) {
+            normalizedPath = normalizedPath.substring(0, normalizedPath.length() - 1);
+        }
+        int lastSlash = normalizedPath.lastIndexOf('/');
+        return (lastSlash == -1) ? normalizedPath : normalizedPath.substring(lastSlash + 1);
+    }
 
     @Override
     public String toString() {

@@ -1,7 +1,7 @@
 package com.projeto.parallelgpu;
 
 import org.jocl.*;
-import com.projeto.util.CSVExportar; // Certifique-se que esta classe existe e está correta
+import com.projeto.util.CSVExportar;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -10,7 +10,6 @@ import java.nio.charset.StandardCharsets;
 import static org.jocl.CL.*;
 
 public class ParallelGPU {
-    // Código do kernel OpenCL MODIFICADO para contar palavras inteiras (comentários internos removidos)
     private static final String KERNEL_SOURCE =
             "inline int is_alphanumeric(char c) {\n" +
                     "    return ((c >= 'a' && c <= 'z') || (c >= '0' && c <= '9'));\n" +
@@ -23,9 +22,7 @@ public class ParallelGPU {
                     "                             __global int* results) {\n" +
                     "    int gid = get_global_id(0);\n" +
                     "    results[gid] = 0;\n" +
-                    "\n" +
                     "    if (wordLength == 0) return;\n" +
-                    "\n" +
                     "    if (gid <= textLength - wordLength) {\n" +
                     "        int potential_match = 1;\n" +
                     "        for (int i = 0; i < wordLength; i++) {\n" +
@@ -34,11 +31,9 @@ public class ParallelGPU {
                     "                break;\n" +
                     "            }\n" +
                     "        }\n" +
-                    "\n" +
                     "        if (potential_match) {\n" +
                     "            int prev_char_is_delimiter = (gid == 0) || (!is_alphanumeric(text[gid - 1]));\n" +
                     "            int next_char_is_delimiter = (gid + wordLength == textLength) || (!is_alphanumeric(text[gid + wordLength]));\n" +
-                    "\n" +
                     "            if (prev_char_is_delimiter && next_char_is_delimiter) {\n" +
                     "                results[gid] = 1;\n" +
                     "            }\n" +
@@ -50,16 +45,20 @@ public class ParallelGPU {
         long startTime = System.currentTimeMillis();
         int count = 0;
         String originalText = readFile(filePath);
+
         if (originalText == null) {
-            System.err.println("Não foi possível ler o arquivo: " + filePath);
-            return new ResultadoContagem(0, 0, executionNumber);
+            System.err.println("Não foi possível ler o arquivo em ParallelGPU: " + filePath);
+            long errorTime = System.currentTimeMillis() - startTime;
+            try {
+                CSVExportar.salvarResultado("gpu-erro", 0, errorTime, 0, filePath, word, executionNumber);
+            } catch (Exception csvEx) {System.err.println("Erro ao salvar resultado de erro para ParallelGPU no CSV: " + csvEx.getMessage());}
+            return new ResultadoContagem(0, errorTime, executionNumber);
         }
 
         String textToProcess = originalText.toLowerCase();
         String wordToSearch = word.toLowerCase();
 
         CL.setExceptionsEnabled(true);
-
         cl_platform_id platform = null;
         cl_device_id device = null;
         cl_context context = null;
@@ -81,18 +80,12 @@ public class ParallelGPU {
             byte[] wordBytes = wordToSearch.getBytes(StandardCharsets.UTF_8);
             int[] resultsArray = new int[textBytes.length];
 
-
-            textBuffer = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-                    (long)textBytes.length * Sizeof.cl_char, Pointer.to(textBytes), null);
-            wordBuffer = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-                    (long)wordBytes.length * Sizeof.cl_char, Pointer.to(wordBytes), null);
-            resultsBuffer = clCreateBuffer(context, CL_MEM_WRITE_ONLY,
-                    (long)resultsArray.length * Sizeof.cl_int, null, null);
-
+            textBuffer = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, (long)textBytes.length * Sizeof.cl_char, Pointer.to(textBytes), null);
+            wordBuffer = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, (long)wordBytes.length * Sizeof.cl_char, Pointer.to(wordBytes), null);
+            resultsBuffer = clCreateBuffer(context, CL_MEM_WRITE_ONLY, (long)resultsArray.length * Sizeof.cl_int, null, null);
 
             program = createProgram(context, KERNEL_SOURCE);
             buildProgram(program, device);
-
             kernel = createKernel(program, "countOccurrences");
             setKernelArgs(kernel, textBuffer, wordBuffer, wordBytes.length, textBytes.length, resultsBuffer);
 
@@ -101,26 +94,28 @@ public class ParallelGPU {
                 globalWorkSize = (long)textBytes.length - wordBytes.length + 1;
             }
 
-
             if (globalWorkSize > 0) {
                 kernelEvent = new cl_event();
-                clEnqueueNDRangeKernel(commandQueue, kernel, 1, null,
-                        new long[]{globalWorkSize}, null, 0, null, kernelEvent);
+                clEnqueueNDRangeKernel(commandQueue, kernel, 1, null, new long[]{globalWorkSize}, null, 0, null, kernelEvent);
                 clWaitForEvents(1, new cl_event[]{kernelEvent});
-                clEnqueueReadBuffer(commandQueue, resultsBuffer, CL_TRUE, 0,
-                        (long)resultsArray.length * Sizeof.cl_int, Pointer.to(resultsArray), 0, null, null);
-
+                clEnqueueReadBuffer(commandQueue, resultsBuffer, CL_TRUE, 0, (long)resultsArray.length * Sizeof.cl_int, Pointer.to(resultsArray), 0, null, null);
                 for (int i = 0; i < globalWorkSize; i++) {
                     count += resultsArray[i];
                 }
             } else {
                 count = 0;
             }
-
         } catch (CLException e) {
-            System.err.println("Erro JOCL: " + e.getMessage());
+            System.err.println("Erro JOCL em ParallelGPU: " + e.getMessage());
             e.printStackTrace();
-            return new ResultadoContagem(count, System.currentTimeMillis() - startTime, executionNumber);
+            // Salva um resultado de erro no CSV
+            long errorTime = System.currentTimeMillis() - startTime;
+            try {
+                CSVExportar.salvarResultado("gpu-erro", 0, errorTime, count, filePath, word, executionNumber);
+            } catch (Exception csvEx) {
+                System.err.println("Erro ao salvar resultado de erro para ParallelGPU no CSV: " + csvEx.getMessage());
+            }
+            return new ResultadoContagem(count, errorTime, executionNumber);
         } finally {
             if (kernelEvent != null) clReleaseEvent(kernelEvent);
             if (kernel != null) clReleaseKernel(kernel);
@@ -133,10 +128,24 @@ public class ParallelGPU {
         }
 
         long totalTime = System.currentTimeMillis() - startTime;
+        try {
+            CSVExportar.salvarResultado(
+                    "gpu",
+                    0, // Para GPU, idConfig pode ser 0
+                    totalTime,
+                    count,
+                    filePath,
+                    word,
+                    executionNumber
+            );
+        } catch (Exception e) {
+            System.err.println("Erro ao salvar resultado para ParallelGPU no CSV: " + e.getMessage());
+            e.printStackTrace();
+        }
         return new ResultadoContagem(count, totalTime, executionNumber);
     }
 
-    private static cl_platform_id getPlatform() {
+    private static cl_platform_id getPlatform() { /* ... como antes ... */
         cl_platform_id[] platforms = new cl_platform_id[1];
         int[] numPlatforms = new int[1];
         int err = clGetPlatformIDs(1, platforms, numPlatforms);
@@ -148,8 +157,7 @@ public class ParallelGPU {
         }
         return platforms[0];
     }
-
-    private static cl_device_id getDevice(cl_platform_id platform) {
+    private static cl_device_id getDevice(cl_platform_id platform) { /* ... como antes ... */
         cl_device_id[] devices = new cl_device_id[1];
         int[] numDevices = new int[1];
         int err = clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, 1, devices, numDevices);
@@ -165,8 +173,7 @@ public class ParallelGPU {
         }
         return devices[0];
     }
-
-    private static cl_context createContext(cl_platform_id platform, cl_device_id device) {
+    private static cl_context createContext(cl_platform_id platform, cl_device_id device) { /* ... como antes ... */
         cl_context_properties contextProperties = new cl_context_properties();
         contextProperties.addProperty(CL_CONTEXT_PLATFORM, platform);
         int[] errcode_ret = new int[1];
@@ -176,8 +183,7 @@ public class ParallelGPU {
         }
         return context;
     }
-
-    private static cl_command_queue createCommandQueue(cl_context context, cl_device_id device) {
+    private static cl_command_queue createCommandQueue(cl_context context, cl_device_id device) { /* ... como antes ... */
         long properties = 0;
         int[] errcode_ret = new int[1];
         cl_command_queue commandQueue = clCreateCommandQueue(context, device, properties, errcode_ret);
@@ -186,8 +192,7 @@ public class ParallelGPU {
         }
         return commandQueue;
     }
-
-    private static cl_program createProgram(cl_context context, String kernelSource) {
+    private static cl_program createProgram(cl_context context, String kernelSource) { /* ... como antes ... */
         int[] errcode_ret = new int[1];
         cl_program program = clCreateProgramWithSource(context, 1, new String[]{kernelSource}, null, errcode_ret);
         if (errcode_ret[0] != CL_SUCCESS) {
@@ -195,8 +200,7 @@ public class ParallelGPU {
         }
         return program;
     }
-
-    private static void buildProgram(cl_program program, cl_device_id device) {
+    private static void buildProgram(cl_program program, cl_device_id device) { /* ... como antes ... */
         int err = clBuildProgram(program, 1, new cl_device_id[]{device}, null, null, null);
         if (err != CL_SUCCESS) {
             long[] logSize = new long[1];
@@ -210,8 +214,7 @@ public class ParallelGPU {
             throw new CLException("Falha ao construir programa: " + stringFor_errorCode(err) + "\nLog de Build:\n" + buildLog);
         }
     }
-
-    private static cl_kernel createKernel(cl_program program, String kernelName) {
+    private static cl_kernel createKernel(cl_program program, String kernelName) { /* ... como antes ... */
         int[] errcode_ret = new int[1];
         cl_kernel kernel = clCreateKernel(program, kernelName, errcode_ret);
         if (errcode_ret[0] != CL_SUCCESS) {
@@ -219,9 +222,7 @@ public class ParallelGPU {
         }
         return kernel;
     }
-
-    private static void setKernelArgs(cl_kernel kernel, cl_mem textBuffer, cl_mem wordBuffer,
-                                      int wordLength, int textLength, cl_mem resultsBuffer) {
+    private static void setKernelArgs(cl_kernel kernel, cl_mem textBuffer, cl_mem wordBuffer, int wordLength, int textLength, cl_mem resultsBuffer) { /* ... como antes ... */
         int argIndex = 0;
         int err;
         err = clSetKernelArg(kernel, argIndex++, Sizeof.cl_mem, Pointer.to(textBuffer));
@@ -235,8 +236,7 @@ public class ParallelGPU {
         err = clSetKernelArg(kernel, argIndex++, Sizeof.cl_mem, Pointer.to(resultsBuffer));
         if (err != CL_SUCCESS) throw new CLException("clSetKernelArg falhou para resultsBuffer: " + stringFor_errorCode(err));
     }
-
-    private static String readFile(String filePath) {
+    private static String readFile(String filePath) { /* ... como antes ... */
         StringBuilder content = new StringBuilder();
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath, StandardCharsets.UTF_8))) {
             String line;
@@ -250,34 +250,29 @@ public class ParallelGPU {
         }
     }
 
+    // Main pode ser mantido para testes individuais
     public static void main(String[] args) {
-        String caminhoArquivo = "projeto.analise.comparativa/datasets/DonQuixote-388208.txt";
+        String caminhoArquivo = "datasets/DonQuixote-388208.txt";
         String palavraBuscar = "y";
+        int numeroDeExecucoes = 3;
 
-        for (int i = 1; i <= 3; i++) {
+        System.out.println("--- Iniciando Testes Individuais ParallelGPU ---");
+        for (int i = 1; i <= numeroDeExecucoes; i++) {
             System.out.printf("\nExecução GPU #%d para a palavra '%s'...\n", i, palavraBuscar);
             ResultadoContagem resultado = countOccurrences(caminhoArquivo, palavraBuscar, i);
             if (resultado != null) {
                 System.out.printf("ParallelGPU: %d ocorrências em %d ms (execução %d)%n",
                         resultado.ocorrencias, resultado.tempoMs, resultado.executionNumber);
-                try {
-                    CSVExportar.salvarResultado("gpu", 0, resultado.tempoMs, resultado.ocorrencias,
-                            caminhoArquivo, palavraBuscar, resultado.executionNumber);
-                    System.out.println("Resultado salvo no CSV.");
-                } catch (Exception e) {
-                    System.err.println("Erro ao salvar resultado no CSV: " + e.getMessage());
-                    e.printStackTrace();
-                }
-            } else {
-                System.out.println("Falha na execução GPU #" + i);
             }
         }
+        System.out.println("\n--- Testes Individuais ParallelGPU Concluídos ---");
     }
 
-    static class ResultadoContagem {
-        int ocorrencias;
-        long tempoMs;
-        int executionNumber;
+    // CLASSE INTERNA ResultadoContagem MODIFICADA
+    public static class ResultadoContagem {
+        public int ocorrencias;       // Campo tornado público
+        public long tempoMs;          // Campo tornado público
+        public int executionNumber;   // Campo tornado público
 
         public ResultadoContagem(int ocorrencias, long tempoMs, int executionNumber) {
             this.ocorrencias = ocorrencias;

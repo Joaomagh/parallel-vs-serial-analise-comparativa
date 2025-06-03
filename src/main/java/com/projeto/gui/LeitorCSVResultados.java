@@ -9,11 +9,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
-/**
- * Lê os dados do arquivo CSV de resultados.
- */
-class LeitorCSVResultados { // Removido 'public'
+class LeitorCSVResultados {
 
     public static List<ResultadoExecucao> lerResultados(String caminhoArquivoCsv) {
         List<ResultadoExecucao> resultados = new ArrayList<>();
@@ -35,7 +35,6 @@ class LeitorCSVResultados { // Removido 'public'
                 if (linha.trim().isEmpty()) {
                     continue;
                 }
-
                 String[] valores = linha.split(",");
                 if (valores.length == 7) {
                     try {
@@ -43,10 +42,9 @@ class LeitorCSVResultados { // Removido 'public'
                         int idConfigCpuGpu = Integer.parseInt(valores[1].trim());
                         long tempoMs = Long.parseLong(valores[2].trim());
                         int ocorrencias = Integer.parseInt(valores[3].trim());
-                        String dataset = valores[4].trim();
+                        String dataset = valores[4].trim(); // Armazena o caminho como está no CSV
                         String palavraBuscada = valores[5].trim();
                         int numExecucao = Integer.parseInt(valores[6].trim());
-
                         resultados.add(new ResultadoExecucao(tipoExecucao, idConfigCpuGpu, tempoMs, ocorrencias, dataset, palavraBuscada, numExecucao));
                     } catch (NumberFormatException e) {
                         System.err.println("Erro ao converter número na linha do CSV: \"" + linha + "\". Detalhe: " + e.getMessage());
