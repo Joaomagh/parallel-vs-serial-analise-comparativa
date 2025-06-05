@@ -5,7 +5,7 @@ class ResultadoExecucao {
     int idConfigCpuGpu;
     long tempoMs;
     int ocorrencias;
-    String dataset; // Armazena o caminho completo/original do CSV
+    String dataset; 
     String palavraBuscada;
     int numExecucao;
 
@@ -27,7 +27,6 @@ class ResultadoExecucao {
     public String getPalavraBuscada() { return palavraBuscada; }
     public int getNumExecucao() { return numExecucao; }
 
-    // Helper para obter apenas o nome do arquivo do dataset
     public String getDatasetFileName() {
         if (dataset == null || dataset.isEmpty()) {
             return "";

@@ -107,7 +107,6 @@ public class ParallelGPU {
             }
         } catch (CLException e) {
             System.err.println("Erro JOCL em ParallelGPU: " + e.getMessage());
-            e.printStackTrace();
             // Salva um resultado de erro no CSV
             long errorTime = System.currentTimeMillis() - startTime;
             try {
@@ -214,7 +213,7 @@ public class ParallelGPU {
             throw new CLException("Falha ao construir programa: " + stringFor_errorCode(err) + "\nLog de Build:\n" + buildLog);
         }
     }
-    private static cl_kernel createKernel(cl_program program, String kernelName) { /* ... como antes ... */
+    private static cl_kernel createKernel(cl_program program, String kernelName) {
         int[] errcode_ret = new int[1];
         cl_kernel kernel = clCreateKernel(program, kernelName, errcode_ret);
         if (errcode_ret[0] != CL_SUCCESS) {
@@ -222,7 +221,7 @@ public class ParallelGPU {
         }
         return kernel;
     }
-    private static void setKernelArgs(cl_kernel kernel, cl_mem textBuffer, cl_mem wordBuffer, int wordLength, int textLength, cl_mem resultsBuffer) { /* ... como antes ... */
+    private static void setKernelArgs(cl_kernel kernel, cl_mem textBuffer, cl_mem wordBuffer, int wordLength, int textLength, cl_mem resultsBuffer) {
         int argIndex = 0;
         int err;
         err = clSetKernelArg(kernel, argIndex++, Sizeof.cl_mem, Pointer.to(textBuffer));
@@ -249,8 +248,7 @@ public class ParallelGPU {
             return null;
         }
     }
-
-    // Main pode ser mantido para testes individuais
+    /*
     public static void main(String[] args) {
         String caminhoArquivo = "datasets/DonQuixote-388208.txt";
         String palavraBuscar = "y";
@@ -267,12 +265,12 @@ public class ParallelGPU {
         }
         System.out.println("\n--- Testes Individuais ParallelGPU Concluídos ---");
     }
+     */
 
-    // CLASSE INTERNA ResultadoContagem MODIFICADA
     public static class ResultadoContagem {
-        public int ocorrencias;       // Campo tornado público
-        public long tempoMs;          // Campo tornado público
-        public int executionNumber;   // Campo tornado público
+        public int ocorrencias;
+        public long tempoMs;
+        public int executionNumber;
 
         public ResultadoContagem(int ocorrencias, long tempoMs, int executionNumber) {
             this.ocorrencias = ocorrencias;

@@ -1,4 +1,4 @@
-package com.projeto.gui; // Ou o pacote onde estão suas outras classes de GUI
+package com.projeto.gui;
 
 import com.projeto.serial.SerialCPU;
 import com.projeto.parallelcpu.ParallelCPU;
@@ -7,7 +7,7 @@ import com.projeto.parallelgpu.ParallelGPU;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
-import java.util.List; // <<<--- IMPORT CORRETO PARA java.util.List
+import java.util.List;
 
 public class TestLauncherSwing extends JFrame {
 

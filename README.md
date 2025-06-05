@@ -86,15 +86,6 @@ Com base nos testes realizados e na análise dos resultados, pode-se concluir qu
 
 Este trabalho contribui para a compreensão prática da aplicação de diferentes técnicas de paralelismo em um problema comum de processamento de texto, destacando que a escolha da melhor abordagem depende intrinsecamente das características da tarefa, do volume de dados e da arquitetura de hardware disponível.
 
-## 5. Referências
-
-*(**Nota para o(s) autor(es):** Adicione aqui quaisquer referências que você tenha consultado, como documentação de Java, OpenCL, JOCL, JFreeChart, artigos sobre paralelismo, etc.)*
-
-* Documentação Oficial do Java (Oracle)
-* Especificação OpenCL (Khronos Group)
-* JOCL - Java Bindings for OpenCL: [http://www.jocl.org/](http://www.jocl.org/)
-* JFreeChart: [https://www.jfree.org/jfreechart/](https://www.jfree.org/jfreechart/)
-* [Outros artigos ou livros sobre computação paralela ou concorrência em Java]
 
 ## 6. Anexos
 
@@ -117,3 +108,119 @@ As principais classes desenvolvidas para este projeto incluem:
 ### Link do Projeto no GitHub
 
 https://github.com/Joaomagh/parallel-vs-serial-analise-comparativa
+
+
+---
+
+## 7. Execução
+
+### 1. Pré-requisitos
+
+- Java JDK 17+
+    - Oracle JDK 
+    - Variável de ambiente JAVA_HOME e PATH configuradas
+
+- Maven 3.6.x+
+    - https://maven.apache.org
+    - Comando mvn no terminal/shell
+
+- Git
+    - https://git-scm.com
+
+- Drivers de GPU com suporte a OpenCL (apenas necessário para execução GPU)
+    - Drivers atualizados da NVIDIA, AMD ou Intel
+
+
+### 1.1 Clonagem
+
+```bash
+git clone https://github.com/Joaomagh/parallel-vs-serial-analise-comparativa.git
+cd parallel-vs-serial-analise-comparativa
+```
+
+### 1.2 Compilação
+
+O processo de compilação é feito pela propria IDE. vá para o passo 3.4
+
+```bash
+mvn clean package
+```
+
+Gera `target/analise-comparativa-1.0-SNAPSHOT.jar`
+
+### 1.3 Execução com IDE (Recomendado)
+
+Abra o projeto com sua IDE (IntelliJ, Eclipse, VSCode com extensão Maven) e:
+- Importe o projeto como um projeto Maven.
+- Execute `TestLauncherSwing` para iniciar os testes
+- Execute `VisualizadorGraficosSwing` para visualizar os resultados
+
+1. Execute `TestLauncherSwing`
+2. Escolha o dataset `.txt`
+3. Digite a palavra alvo
+4. Escolha os algoritmos e defina número de threads
+5. Clique em "Iniciar Testes"
+6. Execute `VisualizadorGraficosSwing` para gerar os gráficos comparativos e escolha sua pasta e palavra procurada
+
+
+### 1.4 Execução via Terminal
+
+obs: caso não queira executar pela IDE
+
+```bash
+java -cp target/analise-comparativa-1.0-SNAPSHOT.jar com.projeto.gui.TestLauncherSwing
+java -cp target/analise-comparativa-1.0-SNAPSHOT.jar com.projeto.gui.VisualizadorGraficosSwing
+```
+
+> Para uso com `java -jar`, configure o MANIFEST.MF ou gere um fat JAR.
+
+### 2. Estrutura de Pastas
+
+```
+datasets/                    # Arquivos de entrada
+results/csv/resultados.csv   # Resultados gerados (CSV)
+src/main/java/               # arquivos Java
+pom.xml                      # Configuração Maven
+```
+
+## 7. Tecnologias
+
+- Java 17, Maven, Swing
+- JOCL (OpenCL em Java)
+- JFreeChart
+- IDEs que recomendo: IntelliJ IDEA, Eclipse, VSCode (com Maven)
+
+## 9. GitHub
+
+[Repositório do Github](https://github.com/Joaomagh/parallel-vs-serial-analise-comparativa)
+
+
+
+<h2 id="colab">🤝 Colaboradores</h2>
+
+Pessoas que colaboraram
+
+<table>
+  <tr>
+    <td align="center">
+      <a href="#">
+        <img src="https://avatars.githubusercontent.com/u/116520638?s=400&u=1321b810211cc12bfbe259adb1a664b0031aa710&v=4" width="100px;" alt="João Pedro Foto"/><br>
+        <sub>
+          <b>Joao Pedro Rego Magalhães</b>
+        </sub>
+      </a>
+    </td>
+    <td align="center">
+      <a href="#">
+        <img src="https://avatars.githubusercontent.com/u/111661983?v=4" width="100px;" alt="João Pedro Foto"/><br>
+        <sub>
+          <b>Guilherme silva</b>
+        </sub>
+      </a>
+    </td>
+  </tr>
+</table>
+
+
+
+

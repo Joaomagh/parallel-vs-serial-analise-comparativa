@@ -1,4 +1,4 @@
-package com.projeto.gui; // Pacote ajustado para com.projeto.gui
+package com.projeto.gui;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -12,15 +12,14 @@ import org.jfree.data.category.DefaultCategoryDataset;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;     // Import para ArrayList
+import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.List;          // Import para List
+import java.util.List;
 import java.util.Map;
-import java.util.Set;           // Import para Set
-import java.util.TreeSet;       // Import para TreeSet
-import java.util.stream.Collectors; // Import para Collectors
-import java.nio.file.Paths;         // Import para Paths
-
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
+import java.nio.file.Paths;
 public class VisualizadorGraficosSwing extends JFrame {
 
     private static final String CAMINHO_CSV = "results/csv/resultados.csv";
@@ -65,7 +64,6 @@ public class VisualizadorGraficosSwing extends JFrame {
         JPanel painelControles = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
 
         comboDatasetsDisplay = new JComboBox<>();
-        // Collectors.toCollection e TreeSet são válidos com os imports corretos
         Set<String> datasetsDisplayUnicos = todosOsResultados.stream()
                 .map(ResultadoExecucao::getDatasetFileName)
                 .collect(Collectors.toCollection(TreeSet::new));
@@ -131,7 +129,6 @@ public class VisualizadorGraficosSwing extends JFrame {
         }
 
         DefaultCategoryDataset datasetParaGrafico = new DefaultCategoryDataset();
-        // Collectors.groupingBy e Collectors.averagingLong são válidos com os imports corretos
         Map<String, Double> mediasPorConfiguracao = todosOsResultados.stream()
                 .filter(r -> datasetSelecionadoDisplay.equals(r.getDatasetFileName()) &&
                         palavraSelecionada.equalsIgnoreCase(r.getPalavraBuscada()))
@@ -179,7 +176,7 @@ public class VisualizadorGraficosSwing extends JFrame {
 
             BarRenderer renderer = (BarRenderer) plot.getRenderer();
             renderer.setDrawBarOutline(false);
-            GradientPaint gp0 = new GradientPaint(0.0f, 0.0f, new Color(255, 100, 100), 0.0f, 0.0f, new Color(200, 50, 50));
+            GradientPaint gp0 = new GradientPaint(0.0f, 0.0f, new Color(78, 105, 239), 0.0f, 0.0f, new Color(5, 44, 147));
             renderer.setSeriesPaint(0, gp0);
 
             CategoryAxis domainAxis = plot.getDomainAxis();

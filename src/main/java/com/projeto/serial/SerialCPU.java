@@ -15,7 +15,7 @@ public class SerialCPU {
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath, StandardCharsets.UTF_8))) {
             String line;
             while ((line = reader.readLine()) != null) {
-                // Usando o mesmo regex robusto para consistência
+
                 String[] words = line.split("[^a-zA-Z0-9áéíóúâêîôûãõçÁÉÍÓÚÂÊÎÔÛÃÕÇ]+");
                 for (String w : words) {
                     if (w != null && !w.trim().isEmpty() && w.equalsIgnoreCase(word)) {
@@ -25,7 +25,7 @@ public class SerialCPU {
             }
         } catch (IOException e) {
             System.err.println("Erro ao ler arquivo em SerialCPU: " + filePath + " - " + e.getMessage());
-            // Retorna um resultado, mas registra o erro
+
             long errorTime = System.currentTimeMillis() - startTime;
             // Tenta salvar um resultado de erro no CSV
             try {
@@ -55,7 +55,7 @@ public class SerialCPU {
         return new ResultadoContagem(count, tempoTotal, executionNumber);
     }
 
-    // Main pode ser mantido para testes individuais, se desejado.
+    /*
     public static void main(String[] args) {
         String caminhoArquivoDataset = "datasets/DonQuixote-388208.txt"; // Exemplo
         String palavraParaBuscar = "y";
@@ -73,11 +73,12 @@ public class SerialCPU {
         System.out.println("\n--- Testes Individuais SerialCPU Concluídos ---");
     }
 
-    // CLASSE INTERNA ResultadoContagem MODIFICADA
+     */
+
     public static class ResultadoContagem {
-        public int ocorrencias;       // Campo tornado público
-        public long tempoMs;          // Campo tornado público
-        public int executionNumber;   // Campo tornado público
+        public int ocorrencias;
+        public long tempoMs;
+        public int executionNumber;
 
         public ResultadoContagem(int ocorrencias, long tempoMs, int executionNumber) {
             this.ocorrencias = ocorrencias;

@@ -6,7 +6,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.List; // Import correto
+import java.util.List;
 import java.util.concurrent.*;
 
 public class ParallelCPU {
@@ -36,7 +36,6 @@ public class ParallelCPU {
         }
     }
 
-    // Nome do método padronizado para countOccurrences
     public static ResultadoContagem countOccurrences(String caminhoArquivo, String palavra, int numThreads, int executionNumber) {
         long inicioTempo = System.currentTimeMillis();
         int totalOcorrencias = 0;
@@ -148,7 +147,10 @@ public class ParallelCPU {
         return palavrasLimpas.toArray(new String[0]);
     }
 
-    // Main pode ser mantido para testes individuais
+
+
+
+/*
     public static void main(String[] args) {
         String caminhoArquivoDataset = "datasets/DonQuixote-388208.txt";
         String palavraParaBuscar = "y";
@@ -169,11 +171,13 @@ public class ParallelCPU {
         System.out.println("\n--- Testes Individuais ParallelCPU Concluídos ---");
     }
 
-    // CLASSE INTERNA ResultadoContagem MODIFICADA
+ */
+
+
     public static class ResultadoContagem {
-        public int ocorrencias;       // Campo tornado público
-        public long tempoMs;          // Campo tornado público
-        public int executionNumber;   // Campo tornado público
+        public int ocorrencias;
+        public long tempoMs;
+        public int executionNumber;
 
         public ResultadoContagem(int ocorrencias, long tempoMs, int executionNumber) {
             this.ocorrencias = ocorrencias;
