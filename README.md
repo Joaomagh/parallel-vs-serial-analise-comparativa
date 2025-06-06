@@ -2,29 +2,29 @@
 
 ## Resumo
 
-Este projeto realiza uma análise comparativa do desempenho de diferentes algoritmos para a contagem de ocorrências de uma palavra específica em arquivos de texto. Foram implementadas e avaliadas três abordagens distintas: uma execução puramente serial em CPU, uma execução paralela utilizando múltiplas threads em CPU, e uma execução paralela utilizando a capacidade de processamento de uma GPU através da tecnologia OpenCL (com a biblioteca JOCL em Java). O objetivo principal é identificar as condições sob as quais cada abordagem oferece maior eficiência computacional, considerando fatores como o tamanho do dataset e a sobrecarga inerente a cada técnica de paralelismo. Os resultados são registrados em formato CSV e visualizados através de gráficos gerados por uma aplicação Swing.
+O projeto faz uma análise comparativa do desempenho de diferentes algoritmos para a contagem de ocorrências de uma palavra específica em arquivos de texto. Foram implementadas e avaliadas três abordagens diferentes: uma execução puramente serial em CPU, uma execução paralela utilizando múltiplas threads em CPU, e uma execução paralela utilizando a capacidade de processamento de uma GPU através da tecnologia OpenCL (com a biblioteca JOCL em Java). O objetivo principal é identificar as condições sob as quais cada abordagem oferece maior qualidade computacional, considerando fatores como o tamanho do dataset e a sobrecarga natural a cada técnica de paralelismo. Os resultados são registrados em formato CSV e visto por gráficos gerados por uma aplicação Swing.
 
 ## 1. Introdução
 
-A busca por eficiência em processamento de dados é um desafio constante na computação. Este trabalho foca na tarefa de contagem de palavras em grandes volumes de texto, um problema comum que pode se beneficiar significativamente de técnicas de paralelização. A abordagem adotada consiste no desenvolvimento e comparação de três métodos distintos em Java:
+A busca por qualidade de processamento de dados é um desafio constante na computação. Este trabalho foca na tarefa de contagem de palavras em maior quantidade de texto, um problema comum que pode se beneficiar significativamente de técnicas de paralelização. A abordagem utilizada consiste no desenvolvimento e comparação de três métodos distintos em Java:
 
-* **Método SerialCPU (`com.projeto.serial.SerialCPU`):** Uma implementação sequencial tradicional. O texto é lido e as palavras são verificadas uma após a outra em um único fluxo de execução. Serve como linha de base para as comparações de desempenho.
+* **Método SerialCPU (`com.projeto.serial.SerialCPU`):** Uma sequência implementada tradicionalmente. O texto é lido e as palavras são verificadas uma após a outra em um único fluxo de execução. Serve como linha de base para as comparações de desempenho.
 
-* **Método ParallelCPU (`com.projeto.parallelcpu.ParallelCPU`):** Utiliza o paralelismo em nível de thread para dividir a tarefa de contagem entre os múltiplos núcleos disponíveis em uma CPU moderna. O arquivo de texto é dividido em segmentos (ou a lista de palavras é dividida), e cada segmento é processado por uma thread separada gerenciada por um `ExecutorService`. O número de threads pode ser configurado pelo usuário.
+* **Método ParallelCPU (`com.projeto.parallelcpu.ParallelCPU`):** Utiliza o paralelismo em nível de thread para dividir a tarefa de contagem entre os múltiplos núcleos disponíveis em uma CPU moderna. O arquivo de texto é dividido em partes (ou a lista de palavras é dividida), e cada parte é processada por uma thread separada gerenciada por um `ExecutorService`. O número de threads pode ser configurado pelo usuário.
 
-* **Método ParallelGPU (`com.projeto.parallelgpu.ParallelGPU`):** Explora o paralelismo massivo oferecido por Unidades de Processamento Gráfico (GPUs). Utiliza a API OpenCL, através da biblioteca JOCL (Java Bindings for OpenCL), para executar um kernel customizado na GPU. O kernel é projetado para verificar ocorrências da palavra-alvo em paralelo, considerando as fronteiras das palavras para uma contagem precisa.
+* **Método ParallelGPU (`com.projeto.parallelgpu.ParallelGPU`):** Explora o paralelismo com maior quantidade oferecido por Unidades de Processamento Gráfico (GPUs). Utiliza a API OpenCL, através da biblioteca JOCL (Java Bindings for OpenCL), para executar um kernel customizado na GPU. O kernel é projetado para verificar ocorrências da palavra-alvo em paralelo, considerando as fronteiras das palavras para uma contagem precisa.
 
-A comparação visa entender os trade-offs entre a simplicidade do código serial, o paralelismo gerenciado pela JVM na CPU, e o poder de processamento bruto (mas com maior overhead de comunicação) da GPU.
+A comparação tem como objetivo entender os trade-offs entre a simplicidade do código serial, o paralelismo gerenciado pela JVM na CPU, e o poder de processamento bruto (mas com maior overhead de comunicação) da GPU.
 
 ## 2. Metodologia
 
-A metodologia empregada neste estudo seguiu as diretrizes propostas, focando em uma análise quantitativa e comparativa dos algoritmos.
+A metodologia utilizada neste estudo seguiu as diretrizes propostas, focando em uma análise quantitativa e comparativa dos algoritmos.
 
 * **Análise Estatística dos Resultados:** "Análise estatística dos resultados obtidos para identificar padrões de desempenho e comparar os algoritmos sob diferentes condições." Os tempos médios de execução de múltiplas amostras são utilizados para a comparação principal.
 
 * **Implementação de Algoritmos:**
     * Todos os algoritmos foram implementados na linguagem Java (JDK 17).
-    * A interação com a GPU foi realizada utilizando JOCL (versão 2.0.4), que fornece bindings Java para a API OpenCL.
+    * A interação com a GPU foi feita utilizando JOCL (versão 2.0.4), que fornece bindings Java para a API OpenCL.
     * A lógica de contagem de palavras foi padronizada para ser case-insensitive e para identificar palavras inteiras (delimitadas por caracteres não alfanuméricos).
 
 * **Framework de Teste:**
@@ -36,7 +36,7 @@ A metodologia empregada neste estudo seguiu as diretrizes propostas, focando em 
         * Disparar a execução dos testes selecionados (por padrão, 3 amostras para cada configuração).
     * **`CSVExportar.java` (`com.projeto.util`):** Classe utilitária responsável por registrar os resultados de cada execução em um arquivo CSV.
 
-* **Execução em Ambientes Variados:** (Esta seção deve ser preenchida pelo(s) autor(es) com detalhes sobre o ambiente de teste: especificações do processador, GPU, sistema operacional, versão do Java, e como as variações de ambiente foram (ou poderiam ser) consideradas). O objetivo é observar a variação no desempenho sob diferentes condições.
+* **Execução em Ambientes Variados:** (Esta seção deve ser preenchida pelo autor com detalhes sobre o ambiente de teste: especificações do processador, GPU, sistema operacional, versão do Java, e como as variações de ambiente foram (ou poderiam ser) consideradas. O objetivo é observar a variação no desempenho sob diferentes condições.
 
 * **Registro de Dados:**
     * Os tempos de execução e contagens de ocorrências são armazenados no arquivo `results/csv/resultados.csv`.
@@ -53,8 +53,6 @@ A metodologia empregada neste estudo seguiu as diretrizes propostas, focando em 
 
 Nesta seção, são apresentados e discutidos os resultados obtidos através da execução dos algoritmos sob diferentes configurações e para diversos datasets e palavras-alvo. Os gráficos gerados pela aplicação `VisualizadorGraficosSwing` são a principal ferramenta para esta análise.
 
-*(**Nota para o(s) autor(es):** Substitua o texto abaixo e as imagens de exemplo pelos seus próprios resultados e análises.)*
-
 **Exemplo de Análise (a ser substituído):**
 
 Foram realizados testes utilizando o dataset `DonQuixote-388208.txt` para diferentes palavras e configurações de threads para o `ParallelCPU`.
@@ -66,7 +64,6 @@ Foram realizados testes utilizando o dataset `DonQuixote-388208.txt` para difere
 * A execução com 6 threads (ZZZ ms) mostrou um desempenho ligeiramente inferior à de 4 e 8 threads, o que pode indicar que para esta tarefa e dataset específicos, o overhead de gerenciamento de um número maior de threads começa a impactar, ou pode ser devido a variações na execução.
 * A implementação GPU (média de AAA ms, incluindo warm-up) apresentou um tempo [maior/menor/comparável] em relação às melhores configurações da CPU. Isso pode ser atribuído [ao overhead de transferência de dados para a GPU / à natureza da tarefa não ser suficientemente massiva para explorar todo o potencial da GPU / ao efeito de warm-up da primeira execução da GPU].
 
-*(Continue com mais gráficos e discussões para diferentes palavras, diferentes datasets, e diferentes números de threads. Analise a escalabilidade, os pontos de saturação, e compare o desempenho relativo de Serial, Parallel CPU e Parallel GPU.)*
 
 **Observações Gerais:**
 * **Escalabilidade do ParallelCPU:** Analise como o tempo de execução varia com o aumento do número de threads. Existe um ponto ótimo? O desempenho degrada após um certo número de threads?
@@ -74,8 +71,6 @@ Foram realizados testes utilizando o dataset `DonQuixote-388208.txt` para difere
 * **Consistência das Ocorrências:** As contagens de palavras foram consistentes entre as diferentes implementações para as mesmas entradas? (Discutir a pequena diferença observada anteriormente, se pertinente).
 
 ## 4. Conclusão
-
-*(**Nota para o(s) autor(es):** Resuma suas principais descobertas aqui.)*
 
 Com base nos testes realizados e na análise dos resultados, pode-se concluir que:
 
@@ -220,7 +215,3 @@ Pessoas que colaboraram
     </td>
   </tr>
 </table>
-
-
-
-
