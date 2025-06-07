@@ -11,23 +11,24 @@ import java.util.List;
 
 public class TestLauncherSwing extends JFrame {
 
-    private JTextField filePathField;
-    private JButton chooseFileButton;
-    private JTextField searchWordField;
-    private JCheckBox serialCPUCheckbox;
-    private JCheckBox parallelCPUCheckbox;
-    private JSpinner numThreadsSpinner;
-    private JCheckBox parallelGPUCheckbox;
-    private JButton startTestsButton;
-    private JTextArea logArea;
+    // Componentes da UI
+    private JTextField campoCaminhoArquivo;
+    private JButton botaoEscolherArquivo;
+    private JTextField campoPalavraBusca;
+    private JCheckBox checkSerialCPU;
+    private JCheckBox checkParaleloCPU;
+    private JSpinner spinnerNumThreads;
+    private JCheckBox checkParaleloGPU;
+    private JButton botaoIniciarTestes;
+    private JTextArea areaLog;
 
-    private static final int EXECUTIONS_PER_TEST_RUN = 3;
+    private static final int NUMERO_EXECUCOES_POR_TESTE = 3;
 
-    public TestLauncherSwing(String title) {
-        super(title);
-        initializeUIComponents();
-        setupLayout();
-        setupActionListeners();
+    public TestLauncherSwing(String titulo) {
+        super(titulo);
+        inicializarComponentesUI();
+        configurarLayout();
+        configurarAcoes();
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(750, 550);
@@ -35,167 +36,170 @@ public class TestLauncherSwing extends JFrame {
         setVisible(true);
     }
 
-    private void initializeUIComponents() {
-        filePathField = new JTextField(35);
-        filePathField.setToolTipText("Caminho para o arquivo de dataset (.txt)");
-        chooseFileButton = new JButton("Escolher Arquivo...");
+    private void inicializarComponentesUI() {
+        campoCaminhoArquivo = new JTextField(35);
+        campoCaminhoArquivo.setToolTipText("Caminho para o arquivo de dataset (.txt)");
+        botaoEscolherArquivo = new JButton("Escolher Arquivo...");
 
-        searchWordField = new JTextField(20);
-        searchWordField.setToolTipText("Palavra a ser buscada no texto");
+        campoPalavraBusca = new JTextField(20);
+        campoPalavraBusca.setToolTipText("Palavra a ser buscada no texto");
 
-        serialCPUCheckbox = new JCheckBox("Serial CPU", true);
-        parallelCPUCheckbox = new JCheckBox("Parallel CPU", true);
-        parallelGPUCheckbox = new JCheckBox("Parallel GPU", true);
+        checkSerialCPU = new JCheckBox("CPU Serial", true);
+        checkParaleloCPU = new JCheckBox("CPU Paralelo", true);
+        checkParaleloGPU = new JCheckBox("GPU Paralelo", true);
 
-        SpinnerModel threadSpinnerModel = new SpinnerNumberModel(
-                Math.max(1, Runtime.getRuntime().availableProcessors() / 2),
-                1, // valor mínimo
-                Math.max(1, Runtime.getRuntime().availableProcessors() * 2),
-                1  // passo
+        SpinnerModel modeloSpinner = new SpinnerNumberModel(
+                Math.max(1, Runtime.getRuntime().availableProcessors() / 2), // Valor inicial dinâmico
+                1, // Valor mínimo
+                Math.max(1, Runtime.getRuntime().availableProcessors() * 2), // Valor máximo sugerido
+                1  // Passo
         );
-        numThreadsSpinner = new JSpinner(threadSpinnerModel);
-        numThreadsSpinner.setToolTipText("Número de threads para Parallel CPU");
-        numThreadsSpinner.setEnabled(parallelCPUCheckbox.isSelected());
-        parallelCPUCheckbox.addActionListener(e -> numThreadsSpinner.setEnabled(parallelCPUCheckbox.isSelected()));
+        spinnerNumThreads = new JSpinner(modeloSpinner);
+        spinnerNumThreads.setToolTipText("Número de threads para CPU Paralelo");
+        spinnerNumThreads.setEnabled(checkParaleloCPU.isSelected());
+        checkParaleloCPU.addActionListener(e -> spinnerNumThreads.setEnabled(checkParaleloCPU.isSelected()));
 
-        startTestsButton = new JButton("Iniciar Testes e Salvar no CSV");
+        botaoIniciarTestes = new JButton("Iniciar Testes e Salvar no CSV");
 
-        logArea = new JTextArea(15, 60);
-        logArea.setEditable(false);
-        logArea.setLineWrap(true);
-        logArea.setWrapStyleWord(true);
-        logArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
+        areaLog = new JTextArea(15, 60);
+        areaLog.setEditable(false);
+        areaLog.setLineWrap(true);
+        areaLog.setWrapStyleWord(true);
+        areaLog.setFont(new Font("Monospaced", Font.PLAIN, 12));
     }
 
-    private void setupLayout() {
-        JPanel inputPanel = new JPanel(new GridBagLayout());
+    private void configurarLayout() {
+        JPanel painelEntrada = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 10, 5, 10);
         gbc.anchor = GridBagConstraints.WEST;
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        gbc.gridx = 0; gbc.gridy = 0; gbc.weightx = 0; inputPanel.add(new JLabel("Arquivo Dataset:"), gbc);
-        gbc.gridx = 1; gbc.gridy = 0; gbc.weightx = 1.0; inputPanel.add(filePathField, gbc);
-        gbc.gridx = 2; gbc.gridy = 0; gbc.weightx = 0; gbc.fill = GridBagConstraints.NONE; inputPanel.add(chooseFileButton, gbc);
+        // Linha 1: Escolher Arquivo
+        gbc.gridx = 0; gbc.gridy = 0; gbc.weightx = 0; painelEntrada.add(new JLabel("Arquivo Dataset:"), gbc);
+        gbc.gridx = 1; gbc.gridy = 0; gbc.weightx = 1.0; painelEntrada.add(campoCaminhoArquivo, gbc);
+        gbc.gridx = 2; gbc.gridy = 0; gbc.weightx = 0; gbc.fill = GridBagConstraints.NONE; painelEntrada.add(botaoEscolherArquivo, gbc);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        gbc.gridx = 0; gbc.gridy = 1; inputPanel.add(new JLabel("Palavra a Buscar:"), gbc);
-        gbc.gridx = 1; gbc.gridy = 1; gbc.gridwidth = 2; inputPanel.add(searchWordField, gbc);
+        // Linha 2: Palavra a Buscar
+        gbc.gridx = 0; gbc.gridy = 1; painelEntrada.add(new JLabel("Palavra a Buscar:"), gbc);
+        gbc.gridx = 1; gbc.gridy = 1; gbc.gridwidth = 2; painelEntrada.add(campoPalavraBusca, gbc);
         gbc.gridwidth = 1;
 
-        gbc.gridx = 0; gbc.gridy = 2; inputPanel.add(new JLabel("Algoritmos:"), gbc);
-        JPanel checksPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
-        checksPanel.add(serialCPUCheckbox);
-        checksPanel.add(parallelCPUCheckbox);
-        checksPanel.add(new JLabel("Threads:"));
-        Dimension spinnerSize = numThreadsSpinner.getPreferredSize();
-        spinnerSize.width = 60;
-        numThreadsSpinner.setPreferredSize(spinnerSize);
-        checksPanel.add(numThreadsSpinner);
-        checksPanel.add(parallelGPUCheckbox);
-        gbc.gridx = 1; gbc.gridy = 2; gbc.gridwidth = 2; inputPanel.add(checksPanel, gbc);
+        // Linha 3: Seleção de Algoritmos
+        gbc.gridx = 0; gbc.gridy = 2; painelEntrada.add(new JLabel("Algoritmos:"), gbc);
+        JPanel painelChecks = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+        painelChecks.add(checkSerialCPU);
+        painelChecks.add(checkParaleloCPU);
+        painelChecks.add(new JLabel("Threads:"));
+        Dimension tamanhoSpinner = spinnerNumThreads.getPreferredSize();
+        tamanhoSpinner.width = 60;
+        spinnerNumThreads.setPreferredSize(tamanhoSpinner);
+        painelChecks.add(spinnerNumThreads);
+        painelChecks.add(checkParaleloGPU);
+        gbc.gridx = 1; gbc.gridy = 2; gbc.gridwidth = 2; painelEntrada.add(painelChecks, gbc);
         gbc.gridwidth = 1;
 
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        buttonPanel.add(startTestsButton);
+        // Botão Iniciar
+        JPanel painelBotao = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        painelBotao.add(botaoIniciarTestes);
 
+        // Montagem final
         setLayout(new BorderLayout(10, 10));
-        add(inputPanel, BorderLayout.NORTH);
-        add(new JScrollPane(logArea), BorderLayout.CENTER);
-        add(buttonPanel, BorderLayout.SOUTH);
-
+        add(painelEntrada, BorderLayout.NORTH);
+        add(new JScrollPane(areaLog), BorderLayout.CENTER);
+        add(painelBotao, BorderLayout.SOUTH);
         ((JPanel)getContentPane()).setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
     }
 
-    private void setupActionListeners() {
-        chooseFileButton.addActionListener(e -> selectDatasetFile());
-        startTestsButton.addActionListener(e -> runSelectedTests());
+    private void configurarAcoes() {
+        botaoEscolherArquivo.addActionListener(e -> selecionarArquivoDataset());
+        botaoIniciarTestes.addActionListener(e -> executarTestesSelecionados());
     }
 
-    private void selectDatasetFile() {
-        JFileChooser fileChooser = new JFileChooser(".");
-        fileChooser.setDialogTitle("Selecione o arquivo de dataset (.txt)");
-        fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("Arquivos de Texto (.txt)", "txt"));
-        fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-        int result = fileChooser.showOpenDialog(this);
-        if (result == JFileChooser.APPROVE_OPTION) {
-            File selectedFile = fileChooser.getSelectedFile();
-            filePathField.setText(selectedFile.getAbsolutePath());
+    private void selecionarArquivoDataset() {
+        JFileChooser seletorArquivo = new JFileChooser(".");
+        seletorArquivo.setDialogTitle("Selecione o arquivo de dataset (.txt)");
+        seletorArquivo.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("Arquivos de Texto (.txt)", "txt"));
+        seletorArquivo.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        int resultado = seletorArquivo.showOpenDialog(this);
+        if (resultado == JFileChooser.APPROVE_OPTION) {
+            File arquivoSelecionado = seletorArquivo.getSelectedFile();
+            campoCaminhoArquivo.setText(arquivoSelecionado.getAbsolutePath());
         }
     }
 
-    private void runSelectedTests() {
-        String filePath = filePathField.getText().trim();
-        String searchWord = searchWordField.getText().trim();
+    private void executarTestesSelecionados() {
+        String caminhoArquivo = campoCaminhoArquivo.getText().trim();
+        String palavraBusca = campoPalavraBusca.getText().trim();
 
-        if (filePath.isEmpty()) {
+        if (caminhoArquivo.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Por favor, selecione um arquivo de dataset.", "Erro de Entrada", JOptionPane.ERROR_MESSAGE);
             return;
         }
-        if (searchWord.isEmpty()) {
+        if (palavraBusca.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Por favor, digite uma palavra para buscar.", "Erro de Entrada", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        logArea.setText("");
-        logMessage("Iniciando testes...");
-        logMessage("Dataset: " + filePath);
-        logMessage("Palavra: " + searchWord);
+        areaLog.setText("");
+        registrarLog("Iniciando testes...");
+        registrarLog("Dataset: " + caminhoArquivo);
+        registrarLog("Palavra: " + palavraBusca);
 
-        startTestsButton.setEnabled(false);
+        botaoIniciarTestes.setEnabled(false);
 
         new SwingWorker<Void, String>() {
             @Override
             protected Void doInBackground() throws Exception {
-                if (serialCPUCheckbox.isSelected()) {
-                    publish("--- Executando Serial CPU ---");
-                    for (int i = 1; i <= EXECUTIONS_PER_TEST_RUN; i++) {
+                if (checkSerialCPU.isSelected()) {
+                    publish("--- Executando CPU Serial ---");
+                    for (int i = 1; i <= NUMERO_EXECUCOES_POR_TESTE; i++) {
                         publish(String.format("Execução Serial #%d...", i));
-                        SerialCPU.ResultadoContagem resultado = SerialCPU.countOccurrences(filePath, searchWord, i);
-                        publish(String.format("SerialCPU: %d ocorrências em %d ms (execução %d)",
+                        SerialCPU.ResultadoContagem resultado = SerialCPU.countOccurrences(caminhoArquivo, palavraBusca, i);
+                        publish(String.format("CPU Serial: %d ocorrências em %d ms (execução %d)",
                                 resultado.ocorrencias, resultado.tempoMs, resultado.executionNumber));
                     }
-                    publish("--- Serial CPU Concluído ---");
+                    publish("--- CPU Serial Concluído ---");
                 }
 
-                if (parallelCPUCheckbox.isSelected()) {
-                    publish("--- Executando Parallel CPU ---");
-                    int numThreads = (Integer) numThreadsSpinner.getValue();
+                if (checkParaleloCPU.isSelected()) {
+                    publish("--- Executando CPU Paralelo ---");
+                    int numThreads = (Integer) spinnerNumThreads.getValue();
                     publish(String.format("Configuração: %d thread(s)", numThreads));
-                    for (int i = 1; i <= EXECUTIONS_PER_TEST_RUN; i++) {
-                        publish(String.format("Execução Parallel CPU #%d...", i));
-                        // CORREÇÃO AQUI: De contarOcorrencias para countOccurrences
-                        ParallelCPU.ResultadoContagem resultado = ParallelCPU.countOccurrences(filePath, searchWord, numThreads, i);
-                        publish(String.format("ParallelCPU: %d ocorrências em %d ms (threads: %d, execução %d)",
+                    for (int i = 1; i <= NUMERO_EXECUCOES_POR_TESTE; i++) {
+                        publish(String.format("Execução CPU Paralelo #%d...", i));
+                        ParallelCPU.ResultadoContagem resultado = ParallelCPU.countOccurrences(caminhoArquivo, palavraBusca, numThreads, i);
+                        publish(String.format("CPU Paralelo: %d ocorrências em %d ms (threads: %d, execução %d)",
                                 resultado.ocorrencias, resultado.tempoMs, numThreads, resultado.executionNumber));
                     }
-                    publish("--- Parallel CPU Concluído ---");
+                    publish("--- CPU Paralelo Concluído ---");
                 }
 
-                if (parallelGPUCheckbox.isSelected()) {
-                    publish("--- Executando Parallel GPU ---");
-                    for (int i = 1; i <= EXECUTIONS_PER_TEST_RUN; i++) {
-                        publish(String.format("Execução Parallel GPU #%d...", i));
-                        ParallelGPU.ResultadoContagem resultado = ParallelGPU.countOccurrences(filePath, searchWord, i);
-                        publish(String.format("ParallelGPU: %d ocorrências em %d ms (execução %d)",
+                if (checkParaleloGPU.isSelected()) {
+                    publish("--- Executando GPU Paralelo ---");
+                    for (int i = 1; i <= NUMERO_EXECUCOES_POR_TESTE; i++) {
+                        publish(String.format("Execução GPU Paralelo #%d...", i));
+                        ParallelGPU.ResultadoContagem resultado = ParallelGPU.contarOcorrencias(caminhoArquivo, palavraBusca, i);
+                        publish(String.format("GPU Paralelo: %d ocorrências em %d ms (execução %d)",
                                 resultado.ocorrencias, resultado.tempoMs, resultado.executionNumber));
                     }
-                    publish("--- Parallel GPU Concluído ---");
+                    publish("--- GPU Paralelo Concluído ---");
                 }
                 return null;
             }
 
             @Override
-            protected void process(List<String> chunks) { // Usa java.util.List<String>
+            protected void process(List<String> chunks) {
                 for (String msg : chunks) {
-                    logMessage(msg);
+                    registrarLog(msg);
                 }
             }
 
             @Override
             protected void done() {
-                startTestsButton.setEnabled(true);
-                logMessage("\nTodos os testes selecionados foram concluídos!");
+                botaoIniciarTestes.setEnabled(true);
+                registrarLog("\nTodos os testes selecionados foram concluídos!");
                 JOptionPane.showMessageDialog(TestLauncherSwing.this,
                         "Testes concluídos! Os resultados foram salvos em resultados.csv.",
                         "Concluído", JOptionPane.INFORMATION_MESSAGE);
@@ -203,10 +207,10 @@ public class TestLauncherSwing extends JFrame {
         }.execute();
     }
 
-    private void logMessage(String message) {
+    private void registrarLog(String mensagem) {
         SwingUtilities.invokeLater(() -> {
-            logArea.append(message + "\n");
-            logArea.setCaretPosition(logArea.getDocument().getLength());
+            areaLog.append(mensagem + "\n");
+            areaLog.setCaretPosition(areaLog.getDocument().getLength());
         });
     }
 

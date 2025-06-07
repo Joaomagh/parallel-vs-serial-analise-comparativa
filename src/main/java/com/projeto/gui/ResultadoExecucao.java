@@ -23,7 +23,7 @@ class ResultadoExecucao {
     public int getIdConfigCpuGpu() { return idConfigCpuGpu; }
     public long getTempoMs() { return tempoMs; }
     public int getOcorrencias() { return ocorrencias; }
-    public String getDataset() { return dataset; } // Retorna o caminho completo
+    public String getDataset() { return dataset; } 
     public String getPalavraBuscada() { return palavraBuscada; }
     public int getNumExecucao() { return numExecucao; }
 

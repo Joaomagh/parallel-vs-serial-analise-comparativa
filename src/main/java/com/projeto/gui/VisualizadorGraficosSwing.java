@@ -9,7 +9,6 @@ import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.renderer.category.BarRenderer;
 import org.jfree.data.category.DefaultCategoryDataset;
-
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
@@ -20,6 +19,9 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.nio.file.Paths;
+
+
+
 public class VisualizadorGraficosSwing extends JFrame {
 
     private static final String CAMINHO_CSV = "results/csv/resultados.csv";
